@@ -11,8 +11,9 @@ routes.put(
   (req, res) => {
     const { serviceName, serviceVersion, servicePort } = req.params;
 
-    const serviceIP = requestIp.getClientIp(req);
-
+    const serviceip = requestIp.getClientIp(req);
+    const serviceIP = req.connection.remoteAddress.includes('::') ? `[${req.connection.remoteAddress}]` : req.connection.remoteAddress;
+    console.log(serviceip , serviceIP)
     const key = serviceRegistry.register(
       serviceName,
       serviceVersion,

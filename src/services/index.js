@@ -5,6 +5,7 @@ class ServiceRegistry {
   }
 
   register(serviceName, serviceVersion, serviceIP, servicePort) {
+    this.cleanup();
     const key = serviceName + serviceVersion + serviceIP + servicePort;
 
     if (this.services[key]) {
@@ -49,6 +50,14 @@ class ServiceRegistry {
 
   getAll() {
     return this.services;
+  }
+
+  cleanup() {
+    Object.keys(this.services).forEach((key) =>
+      this.services[key].timestamp + this.timeout > new Date() / 1000
+        ? null
+        : delete this.services[key]
+    );
   }
 }
 

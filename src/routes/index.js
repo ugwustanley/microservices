@@ -1,75 +1,48 @@
 import { Router } from "express";
-import requestIp from "request-ip";
-
-import ServiceRegistry from "../services/index";
+import UserService from "../services/services.js";
+import axios from "axios";
 
 const routes = Router();
-const serviceRegistry = new ServiceRegistry();
+const userService = new UserService(axios);
 
-routes.put(
-  "/register/:serviceName/:serviceVersion/:servicePort",
-  (req, res) => {
-    const { serviceName, serviceVersion, servicePort } = req.params;
+routes.get("/all-users", async (req, res) => {
+  const all_users = await userService.getAllUsers();
 
-    const serviceIP = requestIp.getClientIp(req);
-
-    const key = serviceRegistry.register(
-      serviceName,
-      serviceVersion,
-      serviceIP,
-      servicePort
-    );
-
-    res.json({
-      message: "service registered",
-      data: { ...req.params, serviceIP },
-      key,
-    });
+  if (all_users) {
+    return res.json({ ...all_users.data });
   }
-);
-
-routes.delete(
-  "/delete/:serviceName/:serviceVersion/:servicePort",
-  (req, res) => {
-    const { serviceName, serviceVersion, servicePort } = req.params;
-
-    const serviceIP = requestIp.getClientIp(req);
-
-    const key = serviceRegistry.unregister(
-      serviceName,
-      serviceVersion,
-      serviceIP,
-      servicePort
-    );
-
-    res.json({
-      message: "service unregistered",
-      data: { ...req.params, serviceIP },
-      key,
-    });
-  }
-);
-
-routes.get("/get/:serviceName/:serviceVersion", (req, res) => {
-  const { serviceName, serviceVersion } = req.params;
-
-  const data = serviceRegistry.get(serviceName, serviceVersion);
-
-  res.json({
-    message: "we got your data",
-    data: data,
-  });
+  return res.status(500).json({ status: 500, message: "an error occurred" });
 });
 
-routes.get("/get-all", (req, res) => {
-  const data = serviceRegistry.getAll();
+routes.delete("/delete/:id", async (req, res) => {
+  const user = await userService.deleteUser(req.params.id);
+  console.log(user)
 
-  res.json({
-    message: "we got your data",
-    data: data,
-  });
+  if (user) {
+    return res.json({ ...user.data });
+  }
+
+  return res.status(500).json({ status: 500, message: "an error occurred" });
 });
 
+routes.get("/user/:id", async (req, res) => {
+  const user = await userService.getUser(req.params.id);
 
+  if (user) {
+    return res.json({ ...user.data });
+  }
+
+  return res.status(500).json({ status: 500, message: "an error occurred" });
+});
+
+routes.post("/user", async (req, res) => {
+  const user = await userService.addUser(req.body);
+
+  if (user) {
+    return res.json({ ...user.data });
+  }
+
+  return res.status(500).json({ status: 500, message: "an error occurred" });
+});
 
 export default routes;

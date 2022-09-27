@@ -1,17 +1,27 @@
-import express from 'express'
-import routes from './routes/index'
+import express from "express";
+import routes from "./routes/index";
+import bodyParser from "body-parser";
+import pjf from "../package.json";
+import axios from "axios";
+import http from "http";
 
-const app = express()
+const app = express();
+const server = http.createServer(app);
 
-app.get("/" , (req, res) =>{
-    res.send("welcome to service registry")
-})
+app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use("/services", routes)
+app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 7000
+app.get("/", (req, res) => {
+  res.send("welcome to service registry navigate to /users");
+});
 
-app.listen(PORT , () =>{
+app.use("/users", routes);
 
-    console.log(`app listening at port ${PORT}`)
-})
+const PORT = process.env.PORT || 7001;
+
+server.listen(6000);
+
+server.on("listening", () => {
+  console.log(`app listening at port ${server.address().port}`);
+});
